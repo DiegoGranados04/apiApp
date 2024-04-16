@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Vehículos</title>
+</head>
+<body>
+    <h1>Registro de Vehículos</h1>
+    
+
+    <form id="vehiculoForm">
+        <label for="placa">Placa:</label>
+        <input type="text" id="placa" name="placa" required><br>
+
+        <label for="marca">Marca:</label>
+        <input type="text" id="marca" name="marca" required><br>
+
+        <label for="modelo">Modelo:</label>
+        <input type="text" id="modelo" name="modelo" required><br>
+
+        <button type="button" id="btnAgregar">Agregar</button>
+        <button type="button" id="btnListar">Listar</button>
+        <button type="button" id="btnBuscar">Buscar</button>
+        <button type="button" id="btnEliminar">Eliminar</button>
+    </form>
+    
+    <h2>Lista de Vehículos</h2>
+    <ul id="listaVehiculos"></ul>
+    
+    <h2>Detalles del Vehículo</h2>
+    <div id="detallesVehiculo"></div>
+
+    <script>
+        const vehiculoForm = document.getElementById('vehiculoForm');
+        const btnAgregar = document.getElementById('btnAgregar');
+        const btnListar = document.getElementById('btnListar');
+        const btnBuscar = document.getElementById('btnBuscar');
+        const btnEliminar = document.getElementById('btnEliminar');
+
+        btnAgregar.addEventListener('click', agregarVehiculo);
+        btnListar.addEventListener('click', listarVehiculos);
+        btnBuscar.addEventListener('click', buscarVehiculo);
+        btnEliminar.addEventListener('click', eliminarVehiculo);
+
+        function agregarVehiculo() {
+            const placa = document.getElementById('placa').value;
+            const marca = document.getElementById('marca').value;
+            const modelo = document.getElementById('modelo').value;
+
+            fetch('http://localhost:3000/vehiculos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ placa, marca, modelo }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.tipo === 'agregar' ? 'Vehículo agregado con éxito' : data.mensaje);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function listarVehiculos() {
+    fetch('http://localhost:3000/vehiculos')
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        mostrarVehiculosEnDOM(data.vehiculos);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function mostrarVehiculosEnDOM(vehiculos) {
+    const listaVehiculos = document.getElementById('listaVehiculos');
+    listaVehiculos.innerHTML = ''; 
+
+    vehiculos.forEach(vehiculo => {
+        const vehiculoElement = document.createElement('li');
+        vehiculoElement.textContent = `Placa: ${vehiculo.placa}, Marca: ${vehiculo.marca}, Modelo: ${vehiculo.modelo}`;
+        listaVehiculos.appendChild(vehiculoElement);
+    });
+}
+
+function buscarVehiculo() {
+    const placa = document.getElementById('placa').value;
+
+    fetch(`http://localhost:3000/vehiculos/${placa}`)
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        mostrarVehiculoEnDOM(data.vehiculo);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function mostrarVehiculoEnDOM(vehiculo) {
+    const detallesVehiculo = document.getElementById('detallesVehiculo');
+    detallesVehiculo.innerHTML = ''; 
+
+    const vehiculoElement = document.createElement('div');
+    vehiculoElement.textContent = `Placa: ${vehiculo.placa}, Marca: ${vehiculo.marca}, Modelo: ${vehiculo.modelo}`;
+    detallesVehiculo.appendChild(vehiculoElement);
+}
+
+        function eliminarVehiculo() {
+            const placa = document.getElementById('placa').value;
+
+            fetch(`http://localhost:3000/vehiculos/${placa}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.tipo === 'delete' ? 'Vehículo eliminado con éxito' : data.mensaje);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
